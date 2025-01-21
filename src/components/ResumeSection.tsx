@@ -78,6 +78,7 @@ const ResumeSection = () => {
             <ul className="mt-2 space-y-2 text-sm list-disc list-inside">
               <li>Developed 3D Car Visualizer using Three.js and React</li>
               <li>Optimized rendering performance through advanced techniques</li>
+              <li>Built User Friendly Tool based on Three.js to create hotspots, animations and variants</li>
               <li>Deployed visualizer for Nissan, Honda, and Peugeot</li>
             </ul>
           </div>
