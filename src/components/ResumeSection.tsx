@@ -1,41 +1,29 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Mail, Linkedin, Github, MapPin, Phone } from 'lucide-react';
+import Card3D from '@/components/3d/3dCard.tsx';
 
-const ResumeSection = () => {
+interface ResumeSectionProps {
+  onSocialClick?: (platform: string) => void;
+}
+
+const ResumeSection: React.FC<ResumeSectionProps> = ({ onSocialClick }) => {
+  const handleSocialClick = (platform: string) => {
+    if (onSocialClick) {
+      onSocialClick(platform);
+    }
+  };
+
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold">Mohammed Sawad</h1>
-        <p className="text-xl text-muted-foreground">
+    <div className="max-w-4xl mx-auto space-y-8 relative z-10">
+      <div className="text-center space-y-4 p-6 bg-background/80 backdrop-blur-sm rounded-lg transform transition-transform hover:scale-105 duration-300" style={{ transformStyle: 'preserve-3d' }}>
+        <h1 className="text-4xl font-bold" style={{ transform: 'translateZ(40px)' }}>Resume</h1>
+        {/* <p className="text-xl text-muted-foreground" style={{ transform: 'translateZ(30px)' }}>
           Senior Software Engineer - 3D Interactive Applications & Game Development
-        </p>
-        <div className="flex justify-center gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <MapPin size={16} /> Bangalore - 560068
-          </div>
-          <div className="flex items-center gap-1">
-            <Phone size={16} /> +91 8431713052
-          </div>
-          <div className="flex items-center gap-1">
-            <Mail size={16} /> msawad08@gmail.com
-          </div>
-        </div>
-        <div className="flex justify-center gap-4">
-          <a href="https://linkedin.com/in/mohammed-sawad" className="flex items-center gap-1 text-primary hover:text-primary/80">
-            <Linkedin size={16} /> LinkedIn
-          </a>
-          <a href="https://github.com/msawad08" className="flex items-center gap-1 text-primary hover:text-primary/80">
-            <Github size={16} /> GitHub
-          </a>
-        </div>
+        </p> */}
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Professional Experience</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      <Card3D title="Professional Experience" id="experience" className="my-8">
+        <div className="space-y-6">
           <div>
             <div className="flex justify-between items-start">
               <div>
@@ -97,67 +85,81 @@ const ResumeSection = () => {
               <li>Implemented multi-threading solutions using Web Workers</li>
             </ul>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </Card3D>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Technical Skills</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <h4 className="font-semibold mb-2">Game Engines</h4>
-              <div className="flex flex-wrap gap-2">
-                {['Unreal Engine 5 (C++ & Blueprints)', 'Unity'].map((skill) => (
-                  <Badge key={skill} variant="secondary">{skill}</Badge>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Web 3D</h4>
-              <div className="flex flex-wrap gap-2">
-                {['Three.js', 'PlayCanvas', 'WebGL', 'GLSL'].map((skill) => (
-                  <Badge key={skill} variant="secondary">{skill}</Badge>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Programming</h4>
-              <div className="flex flex-wrap gap-2">
-                {['C++', 'C#', 'TypeScript', 'Python'].map((skill) => (
-                  <Badge key={skill} variant="secondary">{skill}</Badge>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Specializations</h4>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  'Interactive 3d Applications',
-                  'Shaders and Automations',
-                  'AR/ VR Development (WebXR, Unreal)',
-                ].map((skill) => (
-                  <Badge key={skill} variant="secondary">{skill}</Badge>
-                ))}
-              </div>
+      <Card3D title="Technical Skills" id="skills" className="my-8">
+        <div className="space-y-4">
+          <div className="">
+            <h4 className="font-semibold mb-2">Game Engines</h4>
+            <div className="flex flex-wrap gap-2">
+              {['Unreal Engine 5 (C++ & Blueprints)', 'Unity'].map((skill) => (
+                <Badge
+                  key={skill}
+                  variant="secondary"
+                  className="hover:bg-primary hover:text-primary-foreground transition-colors"
+                >
+                  {skill}
+                </Badge>
+              ))}
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Education</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div>
-            <h3 className="text-lg font-semibold">Bachelor of Engineering (CSE)</h3>
-            <p className="text-primary">Bearys Institute Of Technology, Mangalore</p>
-            <p className="text-sm text-muted-foreground">2013 - 2017</p>
+          <div className="">
+            <h4 className="font-semibold mb-2">Web 3D</h4>
+            <div className="flex flex-wrap gap-2">
+              {['Three.js', 'PlayCanvas', 'WebGL', 'GLSL'].map((skill) => (
+                <Badge
+                  key={skill}
+                  variant="secondary"
+                  className="hover:bg-primary hover:text-primary-foreground transition-colors"
+                >
+                  {skill}
+                </Badge>
+              ))}
+            </div>
           </div>
-        </CardContent>
-      </Card>
+          <div className="">
+            <h4 className="font-semibold mb-2">Programming</h4>
+            <div className="flex flex-wrap gap-2">
+              {['C++', 'C#', 'TypeScript', 'Python'].map((skill) => (
+                <Badge
+                  key={skill}
+                  variant="secondary"
+                  className="hover:bg-primary hover:text-primary-foreground transition-colors"
+                >
+                  {skill}
+                </Badge>
+              ))}
+            </div>
+          </div>
+          <div className="">
+            <h4 className="font-semibold mb-2">Specializations</h4>
+            <div className="flex flex-wrap gap-2">
+              {[
+                'Interactive 3d Applications',
+                'Shaders and Automations',
+                'AR/ VR Development (WebXR, Unreal)',
+              ].map((skill) => (
+                <Badge
+                  key={skill}
+                  variant="secondary"
+                  className="hover:bg-primary hover:text-primary-foreground transition-colors"
+                >
+                  {skill}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Card3D>
+
+      <Card3D title="Education" id="education" className="my-8">
+        <div className="">
+          <h3 className="text-lg font-semibold">Bachelor of Engineering (CSE)</h3>
+          <p className="text-primary">Bearys Institute Of Technology, Mangalore</p>
+          <p className="text-sm text-muted-foreground">2013 - 2017</p>
+        </div>
+      </Card3D>
     </div>
   );
 };
