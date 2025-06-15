@@ -1,71 +1,77 @@
-﻿import React, { useEffect } from 'react';
-import HeroSection from '@/components/hero/HeroSection';
-import PortfolioSection from '@/components/portfolio/Portfolio';
-import ResumeSection from './ResumeSection';
-import ContactSection from './ContactSection';
-import { trackPageView, trackEvent } from '../lib/firebase';
+﻿import { initializeApp, getApps } from "firebase/app";
+import { getAnalytics, logEvent, Analytics } from "firebase/analytics";
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    serverTimestamp,
+    Timestamp,
+    Firestore
+} from "firebase/firestore";
+import { firebaseConfig } from "@/config/firebaseConfig";
 
-const HomePage: React.FC = () => {
-    useEffect(() => {
-        // Track page view when component mounts
-        trackPageView('Home Page');
+// Initialize Firebase only if it hasn't been initialized
+let app;
+let analytics: Analytics;
+let db: Firestore;
 
-        // Track additional events if needed
-        trackEvent('home_page_loaded', {
-            timestamp: new Date().toISOString()
+if (typeof window !== 'undefined' && !getApps().length) {
+    app = initializeApp(firebaseConfig);
+    analytics = getAnalytics(app);
+    db = getFirestore(app);
+}
+
+// Contact form submission
+export interface ContactFormData {
+    name: string;
+    email: string;
+    message: string;
+    timestamp?: Timestamp;
+}
+
+export const submitContactForm = async (formData: ContactFormData) => {
+    try {
+        const contactsRef = collection(db, 'contacts');
+        const docRef = await addDoc(contactsRef, {
+            ...formData,
+            timestamp: serverTimestamp()
         });
 
-        // You could also set up intersection observers to track when sections become visible
-        const observeSections = () => {
-            const sections = document.querySelectorAll('section[id]');
+        // Log analytics event
+        logEvent(analytics, 'contact_form_submitted', {
+            form_id: 'contact_form'
+        });
 
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const sectionId = entry.target.id;
-                        trackEvent('section_viewed', {
-                            section_name: sectionId
-                        });
-                    }
-                });
-            }, { threshold: 0.5 });
+        return { success: true, id: docRef.id };
+    } catch (error) {
+        console.error('Error submitting form:', error);
 
-            sections.forEach(section => {
-                observer.observe(section);
-            });
+        // Log error event
+        logEvent(analytics, 'contact_form_error', {
+            error_message: (error as Error).message
+        });
 
-            // Cleanup function
-            return () => {
-                sections.forEach(section => {
-                    observer.unobserve(section);
-                });
-            };
-        };
-
-        // Set up observers after a short delay to ensure DOM is ready
-        const timer = setTimeout(observeSections, 1000);
-
-        return () => {
-            clearTimeout(timer);
-        };
-    }, []);
-
-    return (
-        <div className="space-y-16 pb-16">
-        <section id="hero">
-            <HeroSection />
-            </section>
-            <section id="portfolio" className="container mx-auto px-2">
-        <PortfolioSection/>
-        </section>
-        <section id="resume" className="container mx-auto px-2">
-        <ResumeSection/>
-        </section>
-        <section id="contact" className="container mx-auto px-2">
-        <ContactSection/>
-        </section>
-        </div>
-);
+        throw error;
+    }
 };
 
-export default HomePage;
+// Page view tracking
+export const trackPageView = (pageName: string) => {
+    if (typeof window !== 'undefined' && analytics) {
+        logEvent(analytics, 'page_view', {
+            page_title: pageName,
+            page_location: window.location.href,
+            page_path: window.location.pathname
+        });
+    }
+};
+
+// Custom event tracking
+export const trackEvent = (eventName: string, eventParams = {}) => {
+    if (typeof window !== 'undefined' && analytics) {
+        logEvent(analytics, eventName, eventParams);
+    }
+};
+
+export { app, analytics, db };
+
