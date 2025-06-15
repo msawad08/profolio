@@ -74,3 +74,4 @@ export const trackEvent = (eventName: string, eventParams = {}) => {
 };
 
 export { app, analytics, db };
+
