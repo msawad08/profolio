@@ -16,20 +16,41 @@ const Navigation: React.FC = () => {
   }, []);
 
   const navLinks = [
-    { href: '#hero', label: 'Home' },
-    { href: '#portfolio-section', label: 'Portfolio' },
-    { href: '#experience', label: 'Experience' },
-    { href: '#skills', label: 'Skills' },
-    { href: '#achievements', label: 'Achievements' },
-    { href: '#contact-heading', label: 'Contact' },
+    { href: '#hero', label: 'Home', fallback: null },
+    { href: '#portfolio-section', label: 'Portfolio', fallback: null },
+    { href: '#experience', label: 'Experience', fallback: '#resume-heading' },
+    { href: '#skills', label: 'Skills', fallback: '#resume-heading' },
+    { href: '#achievements', label: 'Achievements', fallback: '#resume-heading' },
+    { href: '#contact-heading', label: 'Contact', fallback: null },
   ];
 
-  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string, fallback: string | null = null) => {
     e.preventDefault();
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-      setIsMobileMenuOpen(false);
+    setIsMobileMenuOpen(false);
+
+    const scrollToElement = (targetHref: string) => {
+      const element = document.querySelector(targetHref);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return true;
+      }
+      return false;
+    };
+
+    // Try to scroll to main target immediately
+    if (!scrollToElement(href)) {
+      // If element not found, wait for lazy-loaded content
+      setTimeout(() => {
+        if (!scrollToElement(href)) {
+          // Try one more time after a longer delay
+          setTimeout(() => {
+            if (!scrollToElement(href) && fallback) {
+              // If still not found and there's a fallback, scroll to fallback
+              scrollToElement(fallback);
+            }
+          }, 500);
+        }
+      }, 100);
     }
   };
 
@@ -60,7 +81,7 @@ const Navigation: React.FC = () => {
               <a
                 key={link.href}
                 href={link.href}
-                onClick={(e) => scrollToSection(e, link.href)}
+                onClick={(e) => scrollToSection(e, link.href, link.fallback)}
                 className="text-gray-700 hover:text-primary transition-colors font-medium"
               >
                 {link.label}
@@ -93,7 +114,7 @@ const Navigation: React.FC = () => {
                 <a
                   key={link.href}
                   href={link.href}
-                  onClick={(e) => scrollToSection(e, link.href)}
+                  onClick={(e) => scrollToSection(e, link.href, link.fallback)}
                   className="text-gray-700 hover:text-primary transition-colors font-medium px-4 py-2 hover:bg-gray-100 rounded"
                 >
                   {link.label}

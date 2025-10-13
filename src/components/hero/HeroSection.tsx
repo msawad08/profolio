@@ -3,12 +3,26 @@ import { ChevronsDown} from 'lucide-react'
 
 type Vector2 = {x: number, y: number};
 
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  maxLife: number;
+  size: number;
+  opacity: number;
+}
+
 const HeroSection = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const particleCanvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const particlesRef = useRef<Particle[]>([]);
   const [mouse, setMouse] = useState({ x: 0.5, y: 0.5 });
   const [clickIntensity, setClickIntensity] = useState(0.0);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -488,6 +502,9 @@ const HeroSection = () => {
     // Start the animation
     render();
 
+    // Trigger entrance animation
+    setTimeout(() => setIsLoaded(true), 100);
+
     // Cleanup
     return () => {
       window.removeEventListener('resize', handleResize);
@@ -496,6 +513,98 @@ const HeroSection = () => {
       }
     };
   }, [mouse, clickIntensity]);
+
+  // Particle system effect
+  useEffect(() => {
+    const particleCanvas = particleCanvasRef.current;
+    if (!particleCanvas) return;
+
+    const ctx = particleCanvas.getContext('2d');
+    if (!ctx) return;
+
+    const resizeParticleCanvas = () => {
+      particleCanvas.width = window.innerWidth;
+      particleCanvas.height = window.innerHeight;
+    };
+
+    resizeParticleCanvas();
+    window.addEventListener('resize', resizeParticleCanvas);
+
+    // Create initial particles
+    const createParticle = (x?: number, y?: number): Particle => {
+      return {
+        x: x ?? Math.random() * particleCanvas.width,
+        y: y ?? Math.random() * particleCanvas.height,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        life: 1,
+        maxLife: Math.random() * 200 + 100,
+        size: Math.random() * 2 + 1,
+        opacity: Math.random() * 0.5 + 0.3
+      };
+    };
+
+    // Initialize particles
+    for (let i = 0; i < 50; i++) {
+      particlesRef.current.push(createParticle());
+    }
+
+    const animateParticles = () => {
+      ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+
+      // Update and draw particles
+      particlesRef.current = particlesRef.current.filter(particle => {
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.life--;
+
+        // Wrap around screen
+        if (particle.x < 0) particle.x = particleCanvas.width;
+        if (particle.x > particleCanvas.width) particle.x = 0;
+        if (particle.y < 0) particle.y = particleCanvas.height;
+        if (particle.y > particleCanvas.height) particle.y = 0;
+
+        // Draw particle
+        const lifeRatio = particle.life / particle.maxLife;
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${particle.opacity * lifeRatio})`;
+        ctx.fill();
+
+        // Draw connections to nearby particles
+        particlesRef.current.forEach(other => {
+          const dx = other.x - particle.x;
+          const dy = other.y - particle.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < 100) {
+            ctx.beginPath();
+            ctx.moveTo(particle.x, particle.y);
+            ctx.lineTo(other.x, other.y);
+            ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 * (1 - distance / 100) * lifeRatio})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        });
+
+        return particle.life > 0;
+      });
+
+      // Add new particles
+      if (particlesRef.current.length < 50) {
+        particlesRef.current.push(createParticle());
+      }
+
+      requestAnimationFrame(animateParticles);
+    };
+
+    animateParticles();
+
+    return () => {
+      window.removeEventListener('resize', resizeParticleCanvas);
+      particlesRef.current = [];
+    };
+  }, []);
 
   // Mouse tracking
   const handleMouseMove = (event: MouseEvent) => {
@@ -539,6 +648,7 @@ const HeroSection = () => {
 
   return (
     <div className="relative h-screen overflow-hidden" role="banner">
+      {/* WebGL Canvas */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full"
@@ -549,13 +659,26 @@ const HeroSection = () => {
         aria-label="Interactive 3D background with glass spheres"
       />
 
+      {/* Particle System Canvas */}
+      <canvas
+        ref={particleCanvasRef}
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        style={{ mixBlendMode: 'screen' }}
+        aria-hidden="true"
+      />
+
       {/* Overlay UI - Scroll Indicator */}
-      <div className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2">
-        <a href="#portfolio-section" aria-label="Scroll to portfolio section">
-          <ChevronsDown
-            scale={10}
-            className="w-16 h-16 md:w-24 md:h-24 text-white/30 backdrop-blur-xl hover:text-white transition-colors duration-300 cursor-pointer hover:animate-bounce"
-          />
+      <div className={`absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 transition-all duration-1000 delay-1000 ${
+        isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+      }`}>
+        <a href="#portfolio-section" aria-label="Scroll to portfolio section" className="group">
+          <div className="relative">
+            <ChevronsDown
+              scale={10}
+              className="w-16 h-16 md:w-24 md:h-24 text-white/40 hover:text-white transition-all duration-300 cursor-pointer animate-float group-hover:animate-bounce drop-shadow-lg"
+            />
+            <div className="absolute inset-0 bg-white/20 rounded-full blur-xl group-hover:bg-white/30 transition-all duration-300"></div>
+          </div>
         </a>
       </div>
       
@@ -569,32 +692,48 @@ const HeroSection = () => {
       <div className="relative z-10 flex items-center justify-center h-full pointer-events-none px-4">
         <div
           ref={cardRef}
-          className="transition-transform duration-200 ease-out"
+          className={`transition-all duration-1000 ease-out ${
+            isLoaded
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-10'
+          }`}
           style={{ transformStyle: 'preserve-3d' }}
         >
-          <div className="bg-white/30 backdrop-blur-xl shadow-2xl border border-white/20 rounded-2xl p-6 md:p-8 text-center space-y-4 md:space-y-6 max-w-2xl">
+          <div className="bg-white/30 backdrop-blur-xl shadow-2xl border border-white/20 rounded-2xl p-6 md:p-8 text-center space-y-4 md:space-y-6 max-w-2xl hover:shadow-3xl transition-shadow duration-300">
             <h1
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 leading-tight"
+              className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 leading-tight transition-all duration-700 delay-200 ${
+                isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
+              }`}
               style={{ transform: 'translateZ(40px)' }}
             >
               Mohammed Sawad
             </h1>
             <p
-              className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600"
+              className={`text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 transition-all duration-700 delay-400 ${
+                isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
+              }`}
               style={{ transform: 'translateZ(30px)' }}
             >
               Senior Software Architect | Interactive 3D & WebGL Systems | Marketing Technology
             </p>
             <div
-              className="flex flex-wrap justify-center gap-2 md:gap-3"
+              className={`flex flex-wrap justify-center gap-2 md:gap-3 transition-all duration-700 delay-600 ${
+                isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
+              }`}
               style={{ transform: 'translateZ(20px)' }}
             >
-              {technologies.map((tech) => (
+              {technologies.map((tech, index) => (
                 <span
                   key={tech}
-                  className="bg-white/40 backdrop-blur-sm text-gray-700 text-xs md:text-sm font-medium px-3 py-1.5 md:px-4 md:py-2 rounded-full hover:scale-110 transition-transform cursor-pointer border border-white/30"
+                  className={`group relative bg-white/40 backdrop-blur-sm text-gray-700 text-xs md:text-sm font-medium px-3 py-1.5 md:px-4 md:py-2 rounded-full hover:scale-110 hover:bg-white/60 transition-all duration-300 cursor-pointer border border-white/30 hover:border-white/50 hover:shadow-lg pointer-events-auto ${
+                    isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
+                  }`}
+                  style={{
+                    transitionDelay: `${800 + index * 100}ms`,
+                  }}
                 >
                   {tech}
+                  <span className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400/20 to-purple-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </span>
               ))}
             </div>
