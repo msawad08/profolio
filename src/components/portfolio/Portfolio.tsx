@@ -123,11 +123,12 @@ interface ProjectCardProps {
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all">
-      {project.image && <img 
-        src={project.image} 
-        alt={project.title} 
+    <Card className="overflow-hidden hover:shadow-lg transition-all" role="listitem">
+      {project.image && <img
+        src={project.image}
+        alt={`Screenshot of ${project.title} project`}
         className="w-full h-80 object-cover"
+        loading="lazy"
       />}
       <CardHeader>
         <CardTitle className="text-xl">{project.title}</CardTitle>
@@ -160,14 +161,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
 
 const PortfolioSection: React.FC = () => {
   return (
-    <div id="portfolio-section" className="space-y-8">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Portfolio</h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Showcasing my work in 3D interactive applications, WebGL development, and game engineering.
+    <section id="portfolio-section" className="space-y-6 md:space-y-8" aria-labelledby="portfolio-heading">
+      <div className="text-center px-4">
+        <h1 id="portfolio-heading" className="text-3xl md:text-4xl font-bold mb-3 md:mb-4">Portfolio</h1>
+        <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto">
+          Showcasing enterprise-scale 3D interactive applications, WebGL frameworks, and real-time rendering systems that drive business impact.
         </p>
       </div>
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2" role="list">
         {projects.map((project, index) => (
           <div
             key={index}
@@ -187,7 +188,7 @@ const PortfolioSection: React.FC = () => {
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 };
 

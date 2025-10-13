@@ -1,5 +1,5 @@
 import { MouseEvent, useEffect, useRef, useState } from 'react';
-import {ChevronDown, ChevronsDown} from 'lucide-react'
+import { ChevronsDown} from 'lucide-react'
 
 type Vector2 = {x: number, y: number};
 
@@ -395,6 +395,10 @@ const HeroSection = () => {
 
     function createProgram(gl: WebGL2RenderingContext | WebGLRenderingContext, vertexShader: WebGLShader, fragmentShader: WebGLShader) {
       const program = gl.createProgram();
+      if(program === null) {
+        console.error('Failed to create program');
+        return null;
+      }
       gl.attachShader(program, vertexShader);
       gl.attachShader(program, fragmentShader);
       gl.linkProgram(program);
@@ -531,10 +535,10 @@ const HeroSection = () => {
     `;
   };
 
-  const technologies = ['Three.js', 'WebGL', 'Unreal Engine', 'React', 'GLSL'];
+  const technologies = ['Three.js', 'WebGL', 'Unreal Engine', 'React', 'AWS', 'Node.js'];
 
   return (
-    <div className="relative h-screen overflow-hidden">
+    <div className="relative h-screen overflow-hidden" role="banner">
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full"
@@ -542,17 +546,17 @@ const HeroSection = () => {
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         style={{ cursor: 'crosshair' }}
+        aria-label="Interactive 3D background with glass spheres"
       />
-      
-      {/* Overlay UI */}
-      <div className="w-100 absolute bottom-6 left-1/2 traslate-x-[-50%] backdrop-blur-0">
-      <a href="#portfolio-section">
-      <ChevronsDown 
-  scale={10} 
-  className="w-24 h-24 text-white/30 backdrop-blur-xl hover:text-white transition-colors duration-300 cursor-pointer hover:animate-bounce" 
-/>
-      </a>
 
+      {/* Overlay UI - Scroll Indicator */}
+      <div className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2">
+        <a href="#portfolio-section" aria-label="Scroll to portfolio section">
+          <ChevronsDown
+            scale={10}
+            className="w-16 h-16 md:w-24 md:h-24 text-white/30 backdrop-blur-xl hover:text-white transition-colors duration-300 cursor-pointer hover:animate-bounce"
+          />
+        </a>
       </div>
       
       {/* <div className="absolute bottom-6 right-6 text-gray-700 text-xs text-right bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg">
@@ -562,33 +566,33 @@ const HeroSection = () => {
       </div> */}
 
       {/* Hero Content */}
-      <div className="relative z-10 flex items-center justify-center h-full pointer-events-none">
+      <div className="relative z-10 flex items-center justify-center h-full pointer-events-none px-4">
         <div
           ref={cardRef}
           className="transition-transform duration-200 ease-out"
           style={{ transformStyle: 'preserve-3d' }}
         >
-          <div className="bg-white/30 backdrop-blur-xl shadow-2xl border border-white/20 rounded-2xl p-8 text-center space-y-6 max-w-2xl mx-4">
-            <h1 
-              className="text-5xl md:text-6xl font-bold text-gray-800" 
+          <div className="bg-white/30 backdrop-blur-xl shadow-2xl border border-white/20 rounded-2xl p-6 md:p-8 text-center space-y-4 md:space-y-6 max-w-2xl">
+            <h1
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 leading-tight"
               style={{ transform: 'translateZ(40px)' }}
             >
               Mohammed Sawad
             </h1>
-            <p 
-              className="text-xl md:text-2xl text-gray-600" 
+            <p
+              className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600"
               style={{ transform: 'translateZ(30px)' }}
             >
-              Senior Software Engineer specializing in 3D Interactive Applications & Game Development
+              Senior Software Architect | Interactive 3D & WebGL Systems | Marketing Technology
             </p>
-            <div 
-              className="flex flex-wrap justify-center gap-3" 
+            <div
+              className="flex flex-wrap justify-center gap-2 md:gap-3"
               style={{ transform: 'translateZ(20px)' }}
             >
               {technologies.map((tech) => (
                 <span
                   key={tech}
-                  className="bg-white/40 backdrop-blur-sm text-gray-700 text-sm font-medium px-4 py-2 rounded-full hover:scale-110 transition-transform cursor-pointer border border-white/30"
+                  className="bg-white/40 backdrop-blur-sm text-gray-700 text-xs md:text-sm font-medium px-3 py-1.5 md:px-4 md:py-2 rounded-full hover:scale-110 transition-transform cursor-pointer border border-white/30"
                 >
                   {tech}
                 </span>

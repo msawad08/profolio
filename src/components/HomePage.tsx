@@ -1,9 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import HeroSection from '@/components/hero/HeroSection';
-import PortfolioSection from '@/components/portfolio/Portfolio';
-import ResumeSection from './ResumeSection';
-import ContactSection from './ContactSection';
+import Navigation from '@/components/Navigation';
 import { trackPageView, trackEvent } from '../lib/firebase';
+
+// Lazy load sections for better performance
+const PortfolioSection = lazy(() => import('@/components/portfolio/Portfolio'));
+const ResumeSection = lazy(() => import('./ResumeSection'));
+const ContactSection = lazy(() => import('./ContactSection'));
 
 const HomePage: React.FC = () => {
     useEffect(() => {
@@ -17,15 +20,24 @@ const HomePage: React.FC = () => {
     }, []);
 
     return (
-        <div className="space-y-8 pb-16">
-            <section id="hero">
-                <HeroSection />
-            </section>
+        <>
+            <Navigation />
+            <div className="space-y-8 pb-16">
+                <section id="hero">
+                    <HeroSection />
+                </section>
 
+            <Suspense fallback={
+                <div className="container mx-auto px-2 mt-2 flex items-center justify-center min-h-[400px]">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                        <p className="mt-4 text-muted-foreground">Loading...</p>
+                    </div>
+                </div>
+            }>
                 <div className="container mx-auto px-2 mt-2">
                     <PortfolioSection/>
                 </div>
-
 
                 <div className="container mx-auto px-2 mt-2">
                     <ResumeSection/>
@@ -34,7 +46,9 @@ const HomePage: React.FC = () => {
                 <div className="container mx-auto px-2">
                     <ContactSection/>
                 </div>
-        </div>
+            </Suspense>
+            </div>
+        </>
     );
 };
 

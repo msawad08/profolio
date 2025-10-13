@@ -191,18 +191,19 @@ const ContactSection: React.FC = () => {
   };
 
   return (
-      <div className="relative min-h-[600px]">
+      <section className="relative min-h-[600px]" aria-labelledby="contact-heading">
         {/* 3D Background */}
         <div
             ref={backgroundRef}
             className="absolute inset-0 -z-10"
             style={{ height: '100%' }}
+            aria-hidden="true"
         />
 
-        <div className="container mx-auto px-4 py-16 space-y-8 relative z-10">
-          <div className="text-center space-y-4 bg-background/60 backdrop-blur-md p-6 rounded-lg transform hover:scale-105 transition-all duration-300" style={{ transformStyle: 'preserve-3d' }}>
-            <h2 className="text-3xl font-bold" style={{ transform: 'translateZ(40px)' }}>Get in Touch</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto" style={{ transform: 'translateZ(30px)' }}>
+        <div className="container mx-auto px-4 py-8 md:py-16 space-y-6 md:space-y-8 relative z-10">
+          <div className="text-center space-y-4 bg-background/60 backdrop-blur-md p-4 md:p-6 rounded-lg transform hover:scale-105 transition-all duration-300" style={{ transformStyle: 'preserve-3d' }}>
+            <h2 id="contact-heading" className="text-2xl md:text-3xl font-bold" style={{ transform: 'translateZ(40px)' }}>Get in Touch</h2>
+            <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto" style={{ transform: 'translateZ(30px)' }}>
               Feel free to reach out for collaborations, opportunities, or just to say hello!
             </p>
           </div>
@@ -334,7 +335,7 @@ const ContactSection: React.FC = () => {
             </Card3D>
           </div>
         </div>
-      </div>
+      </section>
   );
 };
 
